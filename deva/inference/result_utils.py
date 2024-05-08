@@ -17,6 +17,7 @@ import supervision as sv
 from deva.utils.pano_utils import ID2RGBConverter
 from deva.inference.object_manager import ObjectManager
 from deva.inference.object_info import ObjectInfo
+import json
 
 
 class ResultSaver:
@@ -282,6 +283,7 @@ def save_result(queue: Queue):
                                                         labels=labels)
                     
                     if saver.save_masks_seperately and saver.dataset != 'gradio' and this_out_path is not None:
+                        info = {}
                         for i in range(len(all_masks)):
                             msk = all_masks[i]
                             msk = msk.numpy().astype(np.uint32)
@@ -291,6 +293,9 @@ def save_result(queue: Queue):
                             rgb_msk[obj_msk] = colored_msk
                             msk_img = Image.fromarray(rgb_msk)
                             msk_img.save(path.join(this_out_path, f'{frame_name[:-4]}_{i}.png'))
+                            info[f'{frame_name[:-4]}_{i}.png'] = labels[i]
+                        with open(path.join(this_out_path, f'{frame_name[:-4]}_info.json'), 'w') as f:
+                            json.dump(info, f)
                             
 
 
