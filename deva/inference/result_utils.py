@@ -31,7 +31,9 @@ class ResultSaver:
                  mask_alpha: float = 0.5,
                  annotate_boxes: bool = True,
                  annotate_labels: bool = True,
+                 show_only_annotations: bool = False):
                  save_masks_seperately: bool = False):
+
         self.output_root = output_root
         self.video_name = video_name
         self.dataset = dataset.lower()
@@ -41,8 +43,9 @@ class ResultSaver:
         self.mask_alpha = mask_alpha
         self.annotate_boxes = annotate_boxes
         self.annotate_labels = annotate_labels
+        self.show_only_annotations = show_only_annotations
         self.save_masks_seperately = save_masks_seperately
-
+        
         self.need_remapping = False
         self.json_style = None
         self.output_postfix = None
@@ -249,7 +252,7 @@ def save_result(queue: Queue):
                         raise ValueError('Cannot visualize without image_np or path_to_image')
                 alpha = (out_mask == 0).astype(np.float32) * saver.mask_alpha + (1 - saver.mask_alpha)
                 alpha = alpha[:, :, None]
-                blend = (image_np * alpha + rgb_mask * (1 - alpha)).astype(np.uint8)
+                blend = (image_np * (0 if saver.show_only_annotations else alpha) + rgb_mask * (1 - alpha)).astype(np.uint8)
 
                 if prompts is not None:
                     # draw bounding boxes for the prompts
