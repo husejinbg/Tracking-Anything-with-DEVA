@@ -17,6 +17,7 @@ import supervision as sv
 from deva.utils.pano_utils import ID2RGBConverter
 from deva.inference.object_manager import ObjectManager
 from deva.inference.object_info import ObjectInfo
+import json
 
 
 class ResultSaver:
@@ -31,6 +32,8 @@ class ResultSaver:
                  annotate_boxes: bool = True,
                  annotate_labels: bool = True,
                  show_only_annotations: bool = False):
+                 save_masks_seperately: bool = False):
+
         self.output_root = output_root
         self.video_name = video_name
         self.dataset = dataset.lower()
@@ -41,7 +44,8 @@ class ResultSaver:
         self.annotate_boxes = annotate_boxes
         self.annotate_labels = annotate_labels
         self.show_only_annotations = show_only_annotations
-
+        self.save_masks_seperately = save_masks_seperately
+        
         self.need_remapping = False
         self.json_style = None
         self.output_postfix = None
@@ -280,6 +284,24 @@ def save_result(queue: Queue):
                                 blend = label_annotator.annotate(scene=blend,
                                                         detections=detections,
                                                         labels=labels)
+                    
+                    if saver.save_masks_seperately and saver.dataset != 'gradio' and this_out_path is not None:
+                        info = {}
+                        for i in range(len(all_masks)):
+                            msk = all_masks[i]
+                            msk = msk.numpy().astype(np.uint32)
+                            rgb_msk = np.zeros((*msk.shape[-2:], 3), dtype=np.uint8)
+                            colored_msk = saver.id2rgb_converter._id_to_rgb(all_obj_ids[i])
+                            obj_msk = (msk == 1)
+                            rgb_msk[obj_msk] = colored_msk
+                            msk_img = Image.fromarray(rgb_msk)
+                            msk_img.save(path.join(this_out_path, f'{frame_name[:-4]}_{i}.png'))
+                            info[f'{frame_name[:-4]}_{i}.png'] = labels[i]
+                        with open(path.join(this_out_path, f'{frame_name[:-4]}_info.json'), 'w') as f:
+                            json.dump(info, f)
+                            
+
+
 
                 if saver.dataset != 'gradio':
                     # find a place to save the visualization
