@@ -115,16 +115,18 @@ The following two scripts segment the example clip using either Grounded Segment
 **Script (text-prompted):**
 ```bash
 python demo/demo_with_text.py --chunk_size 4 \
---img_path ./example/vipseg/images/12_1mWNahzcsAc \ 
+--img_path ./example/vipseg/images/12_1mWNahzcsAc \
 --amp --temporal_setting semionline \
 --size 480 \
 --output ./example/output --prompt person.hat.horse
 ```
 
+We support different SAM variants in **text-prompted modes**, by default we use original sam version. For **higher-quality** masks prediction, you specify `--sam_variant sam_hq`. For **running efficient** sam usage, you can specify `--sam_variant sam_hq_light` or `--sam_variant mobile`.
+
 **Script (automatic):**
 ```bash
 python demo/demo_automatic.py --chunk_size 4 \
---img_path ./example/vipseg/images/12_1mWNahzcsAc \ 
+--img_path ./example/vipseg/images/12_1mWNahzcsAc \
 --amp --temporal_setting semionline \
 --size 480 \
 --output ./example/output
