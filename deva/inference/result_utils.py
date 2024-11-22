@@ -31,7 +31,7 @@ class ResultSaver:
                  mask_alpha: float = 0.5,
                  annotate_boxes: bool = True,
                  annotate_labels: bool = True,
-                 show_only_annotations: bool = False):
+                 show_only_annotations: bool = False,
                  save_masks_seperately: bool = False):
 
         self.output_root = output_root
