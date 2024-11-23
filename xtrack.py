@@ -75,6 +75,7 @@ class XTrack:
             
             self.ti += 1
 
+        return self._retrieve_results(frame_name)
         
 
     def finish(self):
@@ -99,7 +100,9 @@ class XTrack:
             mask_img = cv2.imread(path.join(output_path, mask_name))
             mask_data.append((mask_img, label, confidence))
 
-        return mask_data
+        visualization = cv2.imread(path.join(visualizations_path, f"{frame_name_no_ext}.jpg"))
+
+        return mask_data, visualization
 
 
 
