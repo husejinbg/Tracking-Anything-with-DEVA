@@ -32,7 +32,8 @@ class ResultSaver:
                  annotate_boxes: bool = True,
                  annotate_labels: bool = True,
                  show_only_annotations: bool = False,
-                 save_masks_seperately: bool = False):
+                 save_masks_seperately: bool = False,
+                 xtrack_results: Optional[Dict] = None):
 
         self.output_root = output_root
         self.video_name = video_name
@@ -45,6 +46,7 @@ class ResultSaver:
         self.annotate_labels = annotate_labels
         self.show_only_annotations = show_only_annotations
         self.save_masks_seperately = save_masks_seperately
+        self.xtrack_results = xtrack_results
         
         self.need_remapping = False
         self.json_style = None
@@ -285,7 +287,7 @@ def save_result(queue: Queue):
                                                         detections=detections,
                                                         labels=labels)
                     
-                    if saver.save_masks_seperately and saver.dataset != 'gradio' and this_out_path is not None:
+                    if saver.save_masks_seperately and saver.dataset != 'gradio' and saver.xtrack_results is not None:
                         info = {}
                         for i in range(len(all_masks)):
                             msk = all_masks[i]
@@ -294,12 +296,13 @@ def save_result(queue: Queue):
                             colored_msk = saver.id2rgb_converter._id_to_rgb(all_obj_ids[i])
                             obj_msk = (msk == 1)
                             rgb_msk[obj_msk] = colored_msk
-                            msk_img = Image.fromarray(rgb_msk)
-                            msk_img.save(path.join(this_out_path, f'{frame_name[:-4]}_{i}.png'))
+                            # msk_img = Image.fromarray(rgb_msk)
+                            # msk_img.save(path.join(this_out_path, f'{frame_name[:-4]}_{i}.png'))
+                            saver.xtrack_results[f'{frame_name[:-4]}_{i}.png'] = rgb_msk
                             info[f'{frame_name[:-4]}_{i}.png'] = labels[i]
-                        with open(path.join(this_out_path, f'{frame_name[:-4]}_info.json'), 'w') as f:
-                            json.dump(info, f)
-                            
+                        # with open(path.join(this_out_path, f'{frame_name[:-4]}_info.json'), 'w') as f:
+                        #     json.dump(info, f)
+                        saver.xtrack_results[f'{frame_name[:-4]}_info.json'] = info
 
 
 

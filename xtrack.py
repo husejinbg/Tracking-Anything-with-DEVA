@@ -29,6 +29,7 @@ class XTrack:
         self.video_name = video_name
         self.visualize_postfix = 'Visualizations'
         self.output_postfix = 'Annotations'
+        self.xtrack_results = {}
         
         torch.autograd.set_grad_enabled(False)
 
@@ -85,11 +86,9 @@ class XTrack:
         self.deva.clear_buffer()
 
     def _retrieve_results(self, frame_name: str):
-        output_path = path.join(self.output_root, self.output_postfix, self.video_name)
         visualizations_path = path.join(self.output_root, self.visualize_postfix, self.video_name)
         frame_name_no_ext = frame_name.split('.')[0]
-        with open(path.join(output_path, f"{frame_name_no_ext}_info.json"), 'r') as f:
-            info = json.load(f)
+        info = self.xtrack_results[f"{frame_name_no_ext}_info.json"]
 
         mask_data = []
 
@@ -97,7 +96,7 @@ class XTrack:
             mask_name = key
             label = " ".join(value.split()[0:-1])
             confidence = float(value.split()[-1])
-            mask_img = cv2.imread(path.join(output_path, mask_name))
+            mask_img = self.xtrack_results[mask_name]
             mask_data.append((mask_img, label, confidence))
 
         visualization = cv2.imread(path.join(visualizations_path, f"{frame_name_no_ext}.jpg"))
